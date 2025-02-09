@@ -3,12 +3,14 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "homepage": "https://keller-mark.github.io/us-maps/",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
+  "packageManager": "pnpm@9.5.0",
   "dependencies": {
     "@geoarrow/deck.gl-layers": "0.3.0-beta.16",
     "apache-arrow": "^19.0.0",
