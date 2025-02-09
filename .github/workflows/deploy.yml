@@ -1,0 +1,55 @@
+# Adapted from https://github.com/actions/starter-workflows/blob/e9e00b017736d3b3811cedf1ee2e8ceb3c48e3dd/ci/npm-publish.yml
+name: Deploy
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  pre_deploy:
+    runs-on: ubuntu-latest
+    name: Deploy
+    permissions:
+      # Permissions required for the changesets action
+      # to be able to create a new branch and open a pull request
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v3
+        # Reference: https://github.com/changesets/changesets/issues/517#issuecomment-1182094769
+        with:
+          ref: ${{github.event.pull_request.head.sha}}
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org/
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        id: pnpm-install
+        with:
+          run_install: true
+      - name: Build site
+        run: |
+          pnpm run build
+          touch dist/.nojekyll
+          cd -
+      - uses: actions/upload-pages-artifact@v1
+        with:
+          path: sites/docs/dist-root
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      # Permissions required for the changesets action
+      # to be able to create a new branch and open a pull request
+      id-token: write
+      pages: write
+    needs: pre_deploy
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1
+          
